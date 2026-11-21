@@ -4,7 +4,7 @@
 // =============================================================================
 // 2台目 MiLo Bot のコマンド・ID・コード・パケット定義
 //
-//  ・全コンポーネント（CSV管理・コマンド入力(GUI)・Task_provider・Bot_dispatcher・
+//  ・全コンポーネント（CSV管理・コマンド入力(GUI)・Task_provider・Bot_controller・
 //    Station・ブリッジRTC）が、このファイルを #include して同じ番号を使う。
 //  ・通信で送る番号なので、値はすべて明示している。
 //    追加するときは末尾に足し、既存の番号は変えない・使い回さない。
@@ -266,7 +266,7 @@ enum class SYS_STATE_PACKET {
     DATA_LENGTH        = 10
 };
 
-// Task_provider > Bot_dispatcher（Bot指令）。Station指令も同じ形式。
+// Task_provider > Bot_controller（Bot指令）。Station指令も同じ形式。
 enum class BOT_ORDER_PACKET {
     DEST_ID        = 0,  // bot_id（Station指令なら station_id）
     TARGET_DEVICE  = 1,  // TARGET_DEVICE（Station指令なら機構の番号）
@@ -275,7 +275,7 @@ enum class BOT_ORDER_PACKET {
     DATA_LENGTH    = 17  // 3 ＋ I2C 制御指令 14 個
 };
 
-// Bot_dispatcher > Task_provider（Bot状態）
+// Bot_controller > Task_provider（Bot状態）
 enum class BOT_STATE_PACKET {
     BOT_ID            = 0,
     MAIN_STATE        = 1,   // BOT_STATE
@@ -294,21 +294,21 @@ enum class BOT_STATE_PACKET {
     DATA_LENGTH       = 14
 };
 
-// Bot_dispatcher > 完了判定（制御指令・上物）
+// Bot_controller > 完了判定（制御指令・上物）
 enum class UPPER_ORDER_PACKET {
     MCU_ADDR     = 0,
     I2C_START    = 1,   // ここから I2C 制御指令 0〜13 をそのまま入れる
     DATA_LENGTH  = 15
 };
 
-// 完了判定 > Bot_dispatcher（上物状態）
+// 完了判定 > Bot_controller（上物状態）
 enum class UPPER_STATE_PACKET {
     RESULT       = 0,   // RESULT
     I2C_START    = 1,   // ここから I2C 内部状態 0〜8 をそのまま入れる
     DATA_LENGTH  = 10
 };
 
-// Bot_dispatcher > ROS（台車指令）
+// Bot_controller > ROS（台車指令）
 enum class CART_ORDER_PACKET {
     ORDER_TYPE   = 0,  // ORDER_TYPE
     LOCATION_ID  = 1,  // 目的地 ID
@@ -318,7 +318,7 @@ enum class CART_ORDER_PACKET {
     DATA_LENGTH  = 5
 };
 
-// ROS > Bot_dispatcher（台車状態）
+// ROS > Bot_controller（台車状態）
 enum class CART_STATE_PACKET {
     CART_STATUS    = 0,
     RESULT         = 1,  // RESULT
