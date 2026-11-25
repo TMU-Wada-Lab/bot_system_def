@@ -73,6 +73,32 @@ data[milo::to_int(milo::CMD_PACKET::TARGET)]  = milo::to_int(milo::LOCATION_ID::
 
 例：Bot 1 で通常運転を開始 → `[1, 3, 2, 0, 0, 0]`、Bot 1 を Store 1 へ移動 → `[1, 8, 102, 0, 0, 0]`
 
+コマンド入力（GUI）は、番号を見て送り先を振り分けます（GUI → CSV管理 の「シーケンス指令」も同じ形の配列です）。
+
+| コマンド | 送り先 |
+|---|---|
+| `START_SEQUENCE`・`RESUME`・`CANCEL` | CSV管理だけ（シーケンス指令） |
+| `PAUSE`・`ESTOP_ENABLE` | CSV管理（シーケンス指令）と Task_provider の両方 |
+| それ以外 | Task_provider だけ |
+
+### シーケンス状態の配列
+
+CSV管理が GUI へ、Bot ごとに長さ 11 の配列で送ります（`SEQ_STATE_PACKET`）。状態が変わったときと一定周期で送ります。
+
+| 位置 | 項目 | 内容 |
+|---|---|---|
+| 0 | bot_id | |
+| 1 | シーケンス状態 | `SEQUENCE_STATE`（0 なし／1 実行中／2 中断中） |
+| 2 | シーケンス番号 | `SEQUENCE_ID`（なしは 0） |
+| 3 | ステップ | 実行中・中断中のステップ（1〜、なしは 0） |
+| 4 | ステップ数 | そのシーケンスの全ステップ数 |
+| 5 | ステップのコマンド | `COMMAND`（なしは -1） |
+| 6 | 中断の原因 | ステップの `ERROR_CODE`／`REJECT_REASON`（PAUSE・なしは 0） |
+| 7 | 再開可否 | 今 RESUME を受け付けられるか（0 不可／1 可） |
+| 8 | 直近のシーケンス指令 | GUI から届いた `COMMAND`（なしは -1） |
+| 9 | その結果 | `RESULT`（1 受け付けた／3 拒否） |
+| 10 | 拒否理由 | `REJECT_REASON`（受け付けたときは 0） |
+
 ## 2️⃣ `bot_sequence.csv`
 
 ```csv

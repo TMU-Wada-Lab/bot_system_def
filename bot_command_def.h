@@ -241,6 +241,9 @@ enum class REJECT_REASON {
 // パケットの配列インデックス（p.26〜30）。DATA_LENGTH は配列の長さ。
 // -----------------------------------------------------------------------------
 // CSV管理・コマンド入力 > Task_provider（コマンド）
+// コマンド入力 > CSV管理（シーケンス指令）も同じ形式。
+//   GUI は START_SEQUENCE・RESUME・CANCEL を CSV管理だけへ、
+//   PAUSE・ESTOP_ENABLE を CSV管理と Task_provider の両方へ送る。
 enum class CMD_PACKET {
     DEST_ID      = 0,  // 宛先 ID（bot_id・station_id、0＝全台）
     COMMAND      = 1,  // COMMAND
@@ -264,6 +267,25 @@ enum class SYS_STATE_PACKET {
     POS_THETA          = 8,  // mrad
     RESERVED_LOCATION  = 9,  // LOCATION_ID
     DATA_LENGTH        = 10
+};
+
+// CSV管理 > コマンド入力（シーケンス状態）
+//   Bot ごとに 1 配列。状態が変わったときと一定周期で送る。
+//   LAST_REQUEST〜REJECT_REASON は、GUI から届いた直近のシーケンス指令
+//   （START_SEQUENCE・PAUSE・RESUME・CANCEL・ESTOP_ENABLE）を受け付けたかどうか。
+enum class SEQ_STATE_PACKET {
+    BOT_ID         = 0,
+    SEQ_STATE      = 1,  // SEQUENCE_STATE
+    SEQUENCE_ID    = 2,  // SEQUENCE_ID（なしは 0）
+    STEP           = 3,  // 実行中・中断中のステップ番号（1〜、なしは 0）
+    STEP_COUNT     = 4,  // そのシーケンスのステップ数
+    STEP_COMMAND   = 5,  // そのステップのコマンド（COMMAND、なしは -1）
+    STOP_CODE      = 6,  // 中断の原因：ステップの ERROR_CODE／REJECT_REASON（PAUSE・なしは 0）
+    RESUMABLE      = 7,  // 今 RESUME を受け付けられるか（0 不可／1 可）
+    LAST_REQUEST   = 8,  // 直近のシーケンス指令（COMMAND、なしは -1）
+    LAST_RESULT    = 9,  // RESULT：COMPLETED＝受け付けた／REJECTED＝拒否
+    REJECT_REASON  = 10, // 拒否したときの REJECT_REASON（受け付けたときは 0）
+    DATA_LENGTH    = 11
 };
 
 // Task_provider > Bot_controller（Bot指令）。Station指令も同じ形式。
